@@ -3,6 +3,9 @@
 Created on Mon, Jun 25 2018
 
 This script is to convert YOLOv2 annotations into CSV files for use to generate TFRecord.
+Modified based on code found here: https://github.com/datitran/raccoon_dataset/blob/master/xml_to_csv.py
+
+Example usage: python convert_yolov2_to_csv.py -d annotations
 
 #YOLOv2 format:
 Line 1:[category number] [object center in X] [object center in Y] [object width in X] [object width in Y]
@@ -99,16 +102,6 @@ def yolov2_to_csv(path):
                     int(ymax)
                     )
 
-    #     for member in root.findall('object'):
-    #         value = (root.find('filename').text,
-    #                  int(root.find('size')[0].text),
-    #                  int(root.find('size')[1].text),
-    #                  member[0].text,
-    #                  int(member[4][0].text),
-    #                  int(member[4][1].text),
-    #                  int(member[4][2].text),
-    #                  int(member[4][3].text)
-    #                  )
         xml_list.append(value)
         column_name = ['filename', 'width', 'height', 'class', 'xmin', 'ymin', 'xmax', 'ymax']
         xml_df = pd.DataFrame(xml_list, columns=column_name)
