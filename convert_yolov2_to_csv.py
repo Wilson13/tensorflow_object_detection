@@ -33,14 +33,10 @@ from argparse import ArgumentParser
 parser = ArgumentParser()
 parser.add_argument("-d", "--directory", dest="directory",
                     help="directory which contains YOLOv2 annotations txt files", metavar="DIR")
+parser.add_argument("-i", "--image_directory", dest="image_directory",
+                    help="directory which contains image files", metavar="DIR")
 
 args = parser.parse_args()
-
-# def read_yolov2(df, group):
-#     data = namedtuple('data', ['filename', 'object'])
-#     gb = df.groupby(group)
-#     return [data(filename, gb.get_group(x)) for filename, x in zip(gb.groups.keys(), gb.groups)]
-
 
 def image_object_class(x):
     # return object class name as it is digit in yolov2 format
@@ -56,17 +52,17 @@ def filename_without_extension(filename):
     head, tail = os.path.split(filename)
     return tail.replace(".txt", "")
 
-def yolov2_to_csv(path):
+def yolov2_to_csv(annotation_path, image_path):
     xml_list = []
     # loop and find each and every txt annotation file
-    for yolov2_file in glob.glob(path + '/*.txt'):
+    for yolov2_file in glob.glob(annotation_path + '/*.txt'):
 
         # get filename without extension
         filename = filename_without_extension(yolov2_file)
         # Uncomment below to display annotation file name
         #print('File: ' + filename + '.txt')
         # open image to get image size
-        im = Image.open(os.path.join('images', filename + '.jpg'))
+        im = Image.open(os.path.join(image_path, filename + '.jpg'))
         img_width, img_height = im.size
         # Uncomment below to display matching image name and size
         #print('Matching image: ' + im.filename + ' width: ' + str(img_width) + ' height: ' + str(img_height))
@@ -92,7 +88,7 @@ def yolov2_to_csv(path):
             xmax = absolute_x + (box_width / 2)
             ymax = absolute_y + (box_height / 2)
 
-            value = (im.filename,
+            value = (filename_without_extension(im.filename),
                     int(box_width),
                     int(box_height),
                     image_object_class(int(elems[0])),
@@ -110,8 +106,9 @@ def yolov2_to_csv(path):
 
 def main():
 
-    image_path = os.path.join(os.getcwd(), args.directory)#'annotations')
-    yolov2_df = yolov2_to_csv(image_path)
+    image_path = os.path.join(os.getcwd(), args.image_directory)
+    annotation_path = os.path.join(os.getcwd(), args.directory)
+    yolov2_df = yolov2_to_csv(annotation_path, image_path)
     yolov2_df.to_csv('labels.csv', index=None)
     print('Successfully converted xml to csv.')
 
